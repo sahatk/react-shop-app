@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "../../../hooks/redux";
 import styles from "./CardList.module.scss";
-import { fetchProducts } from "../../../store/products/product.slice";
+import { fetchProducts } from "../../../store/products/products.slice";
 import CardItem from "./card-item/CardItem";
 import CardSkeleton from "../card-skeleton/CardSkeleton";
 

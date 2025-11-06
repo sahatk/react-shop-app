@@ -1,35 +1,109 @@
-import { createSlice } from "@reduxjs/toolkit"
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit"
+
+export const postOrder = createAsyncThunk(
+  "cart/postOrder",
+  async (order, thunkAPI) => {
+    try {
+      await axios.post(
+        "https://690c10586ad3beba00f7062b.mockapi.io/orders",
+        order
+      )
+      thunkAPI.dispatch(sendOrder())
+    } catch (error) {
+      return thunkAPI.rejectWithValue("Error sending order");
+    }
+  }
+)
 
 const initialState = {
-  products: [],
+  products: localStorage.getItem("cartProducts") ?
+    JSON.parse(localStorage.getItem("cartProducts")) : [],
   totalPrice: 0,
-  userId: ""
+  userId: localStorage.getItem("userId") ?
+    JSON.parse(localStorage.getItem("userId")) : "",
 }
 
 export const cartSlice = createSlice({
   name: "cart",
   initialState,
   reducers: {
-    addProduct: (state, action) => {
-      const product = action.payload;
-      const existingProduct = state.products.find((p) => p.id === product.id);
+    setUserId: (state, action) => {
+      state.userId = action.payload;
 
-      if (!existingProduct) {
-        state.products.push(product);
-        state.totalPrice += product.price;
-      }
+      localStorage.setItem('userId', JSON.stringify(state.userId));
     },
-    removeProduct: (state, action) => {
-      const productId = action.payload;
-      const product = state.products.find((p) => p.id === productId);
 
-      if (product) {
-        state.products = state.products.filter((p) => p.id !== productId);
-        state.totalPrice -= product.price;
-      }
+
+    removeUserId: (state, action) => {
+      state.userId = "";
+
+      localStorage.setItem('userId', JSON.stringify(state.userId));
+    },
+
+    addToCart: (state, action) => {
+      state.products.push({
+        ...action.payload,
+        quantity: 1,
+        total: action.payload.price
+      })
+
+      localStorage.setItem('cartProducts', JSON.stringify(state.products));
+    },
+
+    deleteFromCart: (state, action) => {
+      state.products = state.products.filter((item) => item.id !== action.payload)
+
+      localStorage.setItem('cartProducts', JSON.stringify(state.products));
+    },
+
+    incrementProduct: (state, action) => {
+      state.products = state.products.map((item) =>
+        item.id === action.payload
+          ? {
+            ...item,
+            quantity: item.quantity + 1,
+            total: item.price * (item.quantity + 1)
+          }
+          : item
+      );
+
+      localStorage.setItem('cartProducts', JSON.stringify(state.products));
+    },
+
+    decrementProduct: (state, action) => {
+      state.products = state.products.map((item) =>
+        item.id === action.payload
+          ? {
+            ...item,
+            quantity: item.quantity - 1,
+            total: item.price * (item.quantity - 1)
+          }
+          : item
+      );
+
+      localStorage.setItem('cartProducts', JSON.stringify(state.products));
+    },
+
+    getTotalPrice: (state) => {
+      state.totalPrice = state.products.reduce(
+        (acc, item) => (acc += item.total),
+        0
+      )
+    },
+    sendOrder: () => {
+      state.products = [];
+      localStorage.setItem('cartProducts', JSON.stringify(state.products));
     }
   }
 })
 
-export const { addProduct, removeProduct } = cartSlice.actions;
+export const {
+  addToCart,
+  deleteFromCart,
+  incrementProduct,
+  decrementProduct,
+  getTotalPrice,
+  setUserId,
+  removeUserId
+} = cartSlice.actions;
 export default cartSlice.reducer;

@@ -1,51 +1,45 @@
-
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios from "axios";
 
-export const fetchProducts = createAsyncThunk(
-  "products/fetchProducts",
-  async (category, thunkAPI) => {
+export const fetchProduct = createAsyncThunk(
+  "product/fetchProduct",
+  async (id, thunkAPI) => {
     try {
-      let response;
-      if (category) {
-        response = await axios.get(`https://fakestoreapi.com/products/category/${category}`);
-      } else {
-        response = await axios.get(`https://fakestoreapi.com/products`);
-      }
-
-
+      const response = await axios.get(
+        `https://fakestoreapi.com/products/${id}`
+      )
 
       return response.data;
     } catch (error) {
-      return thunkAPI.rejectWithValue("Error loading products");
+      return thunkAPI.rejectWithValue("Error loading product");
     }
   }
 )
 
 const initialState = {
-  products: [],
+  product: {},
   isLoading: false,
-  error: "",
+  error: ""
 }
 
-export const productsSlice = createSlice({
-  name: 'products',
+export const productSlice = createSlice({
+  name: 'product',
   initialState,
   reducers: {},
   extraReducers: (builder) => {
     builder
-      .addCase(fetchProducts.pending, (state) => {
+      .addCase(fetchProduct.pending, (state) => {
         state.isLoading = true;
       })
-      .addCase(fetchProducts.fulfilled, (state, action) => {
+      .addCase(fetchProduct.fulfilled, (state, action) => {
         state.isLoading = false;
-        state.products = action.payload;
+        state.product = action.payload;
       })
-      .addCase(fetchProducts.rejected, (state, action) => {
+      .addCase(fetchProduct.rejected, (state, action) => {
         state.isLoading = false;
-        state.error = "Error loading products";
+        state.error = action.payload;
       })
   }
 })
 
-export default productsSlice.reducer;
+export default productSlice.reducer;

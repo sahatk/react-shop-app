@@ -2,15 +2,14 @@ import React from "react";
 import styles from "./CardItem.module.scss";
 import { Link } from "react-router-dom";
 import { useAppSelector, useAppDispatch } from "../../../../hooks/redux";
-import { addProduct } from "../../../../store/cart/cart.slice";
+import { addToCart } from "../../../../store/cart/cart.slice";
 
 const CardItem = ({ item }) => {
   const dispatch = useAppDispatch();
   const { products } = useAppSelector((state) => state.cartSlice);
   const productMatching = products.some((product) => product.id === item.id);
-
-  const handleAddToCart = () => {
-    dispatch(addProduct(item));
+  const addItemToCart = () => {
+    dispatch(addToCart(item));
   };
 
   return (
@@ -30,7 +29,7 @@ const CardItem = ({ item }) => {
         <button
           type="button"
           disabled={productMatching}
-          onClick={handleAddToCart}
+          onClick={() => !productMatching && addItemToCart()}
         >
           {productMatching ? "장바구니에 담긴 제품" : "장바구니에 담기"}
         </button>
